@@ -1,0 +1,3 @@
+My project is a command-line tool that lets people check how strong their passwords are and also helps them make new secure ones. It checks things like how random the password is and how often each character appears. There’s also a feature where you can generate a new password based on what you want, like how long it should be or if it should have symbols.
+Right now, I’ve finished the main parts like checking the strength, analyzing the password, and generating new ones. I also set up a menu so you can pick what to do. Next, I’m planning to connect all the pieces better and make sure it handles inputs properly. I’ll also add a way to show a list of recent passwords the user worked with.
+
