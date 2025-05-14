@@ -1,54 +1,63 @@
-// Displays the user menu for available password utility options
-void displayMenu() {
-    cout << "\nPassword Utility Menu:\n";
-    cout << "1. Analyze Password Strength\n";
-    cout << "2. Generate Secure Password\n";
-    cout << "3. Show Recent Passwords\n";
-    cout << "4. Exit\n";
-    cout << "Enter choice: ";
-}
+// main.cpp
+#include <iostream>
+#include "PasswordAnalyzer.h"
+#include "PasswordGenerator.h"
+#include "PasswordRecord.h"
+#include <queue>
 
-// Calculates password entropy based on character set size and length
-double calculateEntropy(const string& password) {
-    int pool = 0;
-    bool hasLower = false, hasUpper = false, hasDigit = false, hasSpecial = false;
+int main() {
+    std::queue<PasswordRecord> history;
 
-    // Determine which character types are used in the password
-    for (char c : password) {
-        if (islower(c)) hasLower = true;
-        else if (isupper(c)) hasUpper = true;
-        else if (isdigit(c)) hasDigit = true;
-        else hasSpecial = true;
+    while (true) {
+        std::cout << "\n--- Password Analyzer & Generator ---\n";
+        std::cout << "1. Analyze Password Strength\n";
+        std::cout << "2. Generate Strong Password\n";
+        std::cout << "3. View History\n";
+        std::cout << "4. Exit\n";
+        std::cout << "Select an option: ";
+
+        int choice;
+        std::cin >> choice;
+        std::cin.ignore();
+
+        if (choice == 1) {
+            std::string pwd;
+            std::cout << "Enter your password: ";
+            std::getline(std::cin, pwd);
+            double entropy = PasswordAnalyzer::calculateEntropy(pwd);
+            PasswordAnalyzer::analyzePassword(pwd);
+
+            std::string timestamp = PasswordRecord::getCurrentTimestamp();
+            history.push(PasswordRecord(pwd, entropy, timestamp));
+
+        } else if (choice == 2) {
+            int len;
+            char special;
+            std::cout << "Enter desired password length: ";
+            std::cin >> len;
+            std::cout << "Include special characters? (y/n): ";
+            std::cin >> special;
+            bool useSpecial = (special == 'y' || special == 'Y');
+
+            PasswordGenerator generator(len, useSpecial);
+            std::string newPwd = generator.generate();
+            std::cout << "Generated Password: " << newPwd << "\n";
+
+        } else if (choice == 3) {
+            std::queue<PasswordRecord> temp = history;
+            std::cout << "\n--- Password History ---\n";
+            while (!temp.empty()) {
+                temp.front().display();
+                temp.pop();
+            }
+
+        } else if (choice == 4) {
+            std::cout << "Exiting. Goodbye!\n";
+            break;
+
+        } else {
+            std::cout << "Invalid choice. Try again.\n";
+        }
     }
-
-    // Add to the pool size based on character types found
-    if (hasLower) pool += 26;
-    if (hasUpper) pool += 26;
-    if (hasDigit) pool += 10;
-    if (hasSpecial) pool += 32; // Approximate number of special characters
-
-    // Entropy formula: length * log2(pool of possible characters)
-    return password.length() * log2(pool);
-}
-
-// Builds a frequency map of each character in the password
-map<char, int> frequencyAnalysis(const string& password) {
-    map<char, int> freq;
-    for (char c : password) {
-        freq[c]++;  // Increment count for each character
-    }
-    return freq;
-}
-
-// Generates a secure password with optional special characters
-string generatePassword(int length, bool includeSpecial) {
-    string charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    if (includeSpecial) charset += "!@#$%^&*()-_=+[]{}|;:',.<>?/`~";
-
-    string password;
-    // Randomly select characters from the character set
-    for (int i = 0; i < length; ++i) {
-        password += charset[rand() % charset.length()];
-    }
-    return password;
+    return 0;
 }
